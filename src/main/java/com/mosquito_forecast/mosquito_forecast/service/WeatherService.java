@@ -2,15 +2,21 @@ package com.mosquito_forecast.mosquito_forecast.service;
 
 import com.mosquito_forecast.mosquito_forecast.domain.Region;
 import com.mosquito_forecast.mosquito_forecast.domain.Weather;
+import com.mosquito_forecast.mosquito_forecast.dto.weatherDto;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+@NoArgsConstructor
 @Service
 public class WeatherService {
 
     private Weather weather;
 
-    private String weatherKey = "5lgjZJOE7BcXoqm6cw154W1alfFyYwOyw9IDRHQALubgS8fG7PuFJWYlX3d52C8nEm54T2N%2BoQKt%2FouqqXAVvw%3D%3D";
+    @Value("${weatherKey}")
+    private String weatherKey;
 
     private String baseDate = "20240824";
 
@@ -30,9 +36,12 @@ public class WeatherService {
 
     RestTemplate restTemplate = new RestTemplate();
 
+    public weatherDto updateWeather() {
+        ResponseEntity<weatherDto> result = restTemplate.getForEntity(requestUrl, weatherDto.class);
 
+        System.out.println(result.getStatusCode());
+        System.out.println(result.getBody());
 
-    public void updateWeather() {
-
+        return result.getBody();
     }
 }
