@@ -1,6 +1,7 @@
 package com.mosquito_forecast.mosquito_forecast.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 @Data
 @Getter
 @Setter
+@Builder
 public class weatherDto {
     @Schema(description = "날씨 데이터 ID")
     private int weatherId;

@@ -3,6 +3,7 @@ package com.mosquito_forecast.mosquito_forecast.controller;
 import com.mosquito_forecast.mosquito_forecast.dto.weatherDto;
 import com.mosquito_forecast.mosquito_forecast.service.WeatherService;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +24,7 @@ public class WeatherContoller {
     }
 
     @GetMapping("/weather")
-    public void updateWeather() {
+    public void updateWeather() throws ParseException {
         weatherService.updateWeather();
     }
 
