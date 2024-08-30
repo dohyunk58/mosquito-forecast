@@ -12,7 +12,6 @@ import java.time.LocalDate;
 @Data
 @Getter
 @Setter
-@Builder
 public class weatherDto {
     @Schema(description = "날씨 데이터 ID")
     private int weatherId;

@@ -24,7 +24,7 @@ public class WeatherService {
     @Value("${weatherKey}") private String weatherKey;
     @Value("${weatherKeyDecode}") private String weatherKeyDecode;
 
-    private String baseDate = "20240829";
+    private String baseDate = "20240830";
     private String baseTime = "2000";
     private int nx = 60;
     private int ny = 127;
@@ -74,23 +74,49 @@ public class WeatherService {
         // 4. 하단 item
         JSONArray jsonItemList = (JSONArray) jsonItems.get("item");
 
-        List<weatherDto> result = new ArrayList<>();
+        // 하나의 DTO 객체만 생성
+        weatherDto dto = new weatherDto();
 
+        // jsonItemList의 각 item에 대해 필드 설정
         for (Object o : jsonItemList) {
             JSONObject item = (JSONObject) o;
-            result.add(makeLocationDto(item));
+            updateWeatherDto(dto, item);
         }
 
-        System.out.println(result.get(0));
-        System.out.println(result.get(0).getBaseDate());
+        // DTO 객체 출력 또는 다른 작업 수행
+        System.out.println(dto);
     }
 
-    // 콘텐츠 정보 JSON을 DTO로 변환
-    private weatherDto makeLocationDto(JSONObject item) {
-        weatherDto dto = weatherDto.builder().
-                baseDate((String) item.get("baseDate")).
-                baseTime((String) item.get("baseTime")).
-                build();
-        return dto;
+    private void updateWeatherDto(weatherDto dto, JSONObject item) {
+        String category = (String) item.get("category");
+        String obsrValue = (String) item.get("obsrValue");
+
+        // 기본 정보 설정 (첫번째 item에서만 설정하도록 조건 추가 가능)
+        if (dto.getBaseDate() == null) {
+            dto.setBaseDate((String) item.get("baseDate"));
+            dto.setBaseTime((String) item.get("baseTime"));
+        }
+
+        // category에 따라 값을 설정
+        switch (category) {
+            case "PTY":
+                dto.setPrecipitationType(obsrValue);
+                break;
+            case "REH":
+                dto.setHumidity(obsrValue);
+                break;
+            case "RN1":
+                dto.setHourlyPrecipitation(obsrValue);
+                break;
+            case "T1H":
+                dto.setTemperature(obsrValue);
+                break;
+            // 다른 category 값들에 대한 처리가 필요하다면 여기 추가
+            default:
+                // 처리되지 않은 카테고리 경우
+                break;
+        }
     }
+
+
 }
