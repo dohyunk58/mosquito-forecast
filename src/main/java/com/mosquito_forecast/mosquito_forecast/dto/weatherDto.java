@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class weatherDto {
-    @Schema(description = "날씨 데이터 ID")
+    @Schema(description = "날씨 데이터 ID") // 필요한가?
     private int weatherId;
     @Schema(description = "날씨 데이터 기준 날짜")
     // private LocalDate weatherDate;

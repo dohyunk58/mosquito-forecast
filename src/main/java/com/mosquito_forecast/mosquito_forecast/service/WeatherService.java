@@ -1,6 +1,8 @@
 package com.mosquito_forecast.mosquito_forecast.service;
 
+import com.mosquito_forecast.mosquito_forecast.dto.regionForm;
 import com.mosquito_forecast.mosquito_forecast.dto.weatherDto;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.NoArgsConstructor;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -10,12 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 
 @NoArgsConstructor
 @Service
@@ -24,15 +25,18 @@ public class WeatherService {
     @Value("${weatherKey}") private String weatherKey;
     @Value("${weatherKeyDecode}") private String weatherKeyDecode;
 
-    private String baseDate = "20240830";
-    private String baseTime = "2000";
-    private int nx = 60;
-    private int ny = 127;
+    // 현재 시간과 날짜 확인 기능으로 사라지게 될 기본 시간과 날짜 변수
+    private String baseDate = "20240904";
+    private String baseTime = "1500";
 
+    // 기상청 초단기실황 API Url
     private final String apiUrl = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst";
     private String JsonString;
 
-    public URI buildWeatherUri() throws URISyntaxException {
+    // 날씨 정보를 담을 dto 생성
+    weatherDto dto = new weatherDto();
+
+    public URI buildWeatherUri(regionForm regionform) throws URISyntaxException {
         String requestUrl = apiUrl +
                 "?serviceKey=" + weatherKey +
                 "&pageNo=1" +
@@ -40,25 +44,29 @@ public class WeatherService {
                 "&dataType=JSON" +
                 "&base_date=" + baseDate +
                 "&base_time=" + baseTime +
-                "&nx=" + nx +
-                "&ny=" + ny;
+                "&nx=" + regionform.getXPoint() +
+                "&ny=" + regionform.getYPoint();
 
         return new URI(requestUrl);  // Create URI object
     }
 
     @Autowired
-    RestTemplate restTemplate;
+    RestTemplate restTemplate; // 스프링 컨테이너에 등록된 RestTemplate 불러오기
 
-    public void updateWeather() throws ParseException{
+    @ResponseBody // Resttemplate JSON 형식으로 반환하기 위함
+    @Schema(description = "/weather Get 요청시 호출하는 함수, weatherdto를 return합니다")
+    public weatherDto updateWeather(regionForm regionform) throws ParseException{
         try{
-            URI uri = buildWeatherUri();
+            URI uri = buildWeatherUri(regionform);
             ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
             //System.out.println(result.getStatusCode());
             //System.out.println(result.getBody());
             JsonString = result.getBody();
             JsonParser();
+            return dto;
         } catch (URISyntaxException e) {
-            e.printStackTrace();  // Handle possible URI syntax errors
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -73,9 +81,6 @@ public class WeatherService {
         JSONObject jsonItems = (JSONObject) jsonBody.get("items");
         // 4. 하단 item
         JSONArray jsonItemList = (JSONArray) jsonItems.get("item");
-
-        // 하나의 DTO 객체만 생성
-        weatherDto dto = new weatherDto();
 
         // jsonItemList의 각 item에 대해 필드 설정
         for (Object o : jsonItemList) {
@@ -117,6 +122,4 @@ public class WeatherService {
                 break;
         }
     }
-
-
 }
